@@ -1,0 +1,3 @@
+Pillow
+win10toast
+pyglet

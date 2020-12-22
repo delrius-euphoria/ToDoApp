@@ -1,0 +1,7 @@
+Ver 1.00:
+    - Added Basic functionalities:
+        - Add tasks
+        - Remove tasks
+        - Show pending tasks
+        - Show progress
+    - Beta version
