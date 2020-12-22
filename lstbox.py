@@ -28,7 +28,6 @@ class Tasks(tk.Frame):
         self.count = 0
         self.d_date = d_date
     
-        # print(len(text))
         self.canvas = tk.Canvas(self, bg='white', height=50, width=500)
         self.canvas.pack(fill='both', expand=1)
 
@@ -74,7 +73,6 @@ class Tasks(tk.Frame):
         self.canvas.bind('<Double-Button-1>', self.check)
 
         if len(self.text) > 20:
-            # print(len(self.text))
             self.mod_text = self.text[:15] + '\n' + self.text[15:]
             self.canvas.itemconfig('text', text=self.mod_text)
             self.canvas.config(height=100)
@@ -82,7 +80,6 @@ class Tasks(tk.Frame):
             self.canvas.coords('check', 100, 50)
             self.canvas.coords('dustbin', 450, 50)
             if len(self.text) > 40:
-                print(len(self.text))
                 self.mod_text = self.text[:30] + '...'
                 self.canvas.itemconfig('text',text=self.mod_text)
     
@@ -106,7 +103,6 @@ class Tasks(tk.Frame):
         self.canvas.tag_bind('check', '<Button-1>',
                              lambda event=None: self.change(count, ticked))
         self.ticked = ticked
-        # print('Done' if self.ticked else 'Pending')
 
     def task_status(self):
         return self.ticked
@@ -153,7 +149,6 @@ class PrevTasks(tk.Frame):
         self.text = text
         self.func = func
 
-        # print(len(text))
         self.canvas = tk.Canvas(self, bg='white', height=50, width=500)
         self.canvas.pack(fill='both', expand=1)
 
@@ -176,14 +171,12 @@ class PrevTasks(tk.Frame):
                              lambda event=None: self.canvas.itemconfig('check',image=self.img))
 
         if len(self.text) > 20:
-            # print(len(self.text))
             self.mod_text = self.text[:15] + '\n' + self.text[15:]
             self.canvas.itemconfig('text', text=self.mod_text)
             self.canvas.config(height=100)
             self.canvas.coords('text', 250, 50)
             self.canvas.coords('check', 450, 50)
             if len(self.text) > 40:
-                print(len(self.text))
                 self.mod_text = self.text[:30] + '...'
                 self.canvas.itemconfig('text',text=self.mod_text)
     
