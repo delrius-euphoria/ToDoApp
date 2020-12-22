@@ -206,13 +206,3 @@ def create_table(con):
         `Tasks` text,
         `Date` text,
         `completed` integer)''')
-
-
-if __name__ == '__main__':
-    root = tk.Tk()
-
-    a = PrevTasks(root, text='sadasdsad')
-    # lst.append(a)
-    a.pack()
-
-    root.mainloop()
