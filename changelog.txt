@@ -1,4 +1,8 @@
-Ver 1.00:
+Ver Beta 2.00:
+    - Major bug fixes 
+    - Dynamic sizing of the widgets and window
+
+Ver Beta 1.00:
     - Added Basic functionalities:
         - Add tasks
         - Remove tasks

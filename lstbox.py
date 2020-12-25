@@ -27,26 +27,31 @@ class Tasks(tk.Frame):
         self.ticked = ticked
         self.count = 0
         self.d_date = d_date
-    
-        self.canvas = tk.Canvas(self, bg='white', height=50, width=500)
+        self.sc_h,self.sc_w = self.parent.winfo_screenheight(),self.parent.winfo_screenwidth()
+        cnv_h,cnv_w = self.sc_h/21.6,self.sc_w/3.84
+
+        self.canvas = tk.Canvas(self, bg='white', height=cnv_h, width=cnv_w) #500x50
         self.canvas.pack(fill='both', expand=1)
 
-        self.canvas.create_text(250, 25, text=self.text,
-                                font=('coolvetica compressed rg',30), tag='text')
+        self.canvas.create_text(cnv_w/2, cnv_h/2, text=self.text,
+                                font=('coolvetica compressed rg',30), tag='text') #250,25
 
+        tick_img_res_h,tick_img_res_w = int(self.sc_w/76.8),int(self.sc_h/43.2) #25,25
+        dust_img_res_h,dust_img_res_w = int(self.sc_w/54.85), int(self.sc_h/30.85) #35,35
+        
         self.img = ImageTk.PhotoImage(Image.open(
-            'images/unchecked3.png').resize((25, 25), Image.ANTIALIAS))
+            'images/unchecked3.png').resize((tick_img_res_w,tick_img_res_h), Image.ANTIALIAS)) #25,25
         self.img1 = ImageTk.PhotoImage(Image.open(
-            'images/checked3.png').resize((25, 25), Image.ANTIALIAS))
+            'images/checked3.png').resize((tick_img_res_w,tick_img_res_h), Image.ANTIALIAS)) #25,25
         self.img2 = ImageTk.PhotoImage(Image.open(
-            'images/hover.png').resize((25, 25), Image.ANTIALIAS))
+            'images/hover.png').resize((tick_img_res_w,tick_img_res_h), Image.ANTIALIAS)) #25,25
         self.img3 = ImageTk.PhotoImage(Image.open(
-            'images/dustbin.png').resize((35, 35), Image.ANTIALIAS))
+            'images/dustbin.png').resize((dust_img_res_w,dust_img_res_h), Image.ANTIALIAS)) #35,35
         self.img4 = ImageTk.PhotoImage(Image.open(
-            'images/dustbinhover.png').resize((35, 35), Image.ANTIALIAS))
+            'images/dustbinhover.png').resize((dust_img_res_w,dust_img_res_h), Image.ANTIALIAS)) #35,35
 
         self.canvas.create_image(
-            100, 25, image=self.img, anchor='center', tag='check')
+            cnv_w/5, cnv_h/2, image=self.img, anchor='center', tag='check') #100,25
 
         self.canvas.tag_bind(
             'check', '<Button-1>', lambda event=None: self.change(self.count, self.ticked))
@@ -56,7 +61,7 @@ class Tasks(tk.Frame):
                              lambda event=None: self.leave())
 
         self.canvas.create_image(
-            450, 25, image=self.img3, anchor='center', tag='dustbin')
+            cnv_w/1.11, cnv_h/2, image=self.img3, anchor='center', tag='dustbin') #450,25
         self.canvas.tag_bind('dustbin', '<Button-1>', self.ridoff)
         self.canvas.tag_bind('dustbin', '<Enter>',
                              lambda event=None: self.enter1())
@@ -73,31 +78,37 @@ class Tasks(tk.Frame):
         self.canvas.bind('<Double-Button-1>', self.check)
 
         if len(self.text) > 20:
+
             self.mod_text = self.text[:15] + '\n' + self.text[15:]
             self.canvas.itemconfig('text', text=self.mod_text)
-            self.canvas.config(height=100)
-            self.canvas.coords('text', 250, 50)
-            self.canvas.coords('check', 100, 50)
-            self.canvas.coords('dustbin', 450, 50)
+            self.canvas.config(height=cnv_w/5) #100
+            self.canvas.coords('text', cnv_w/2, cnv_h) #250,50
+            self.canvas.coords('check', cnv_w/5, cnv_h) #100,50
+            self.canvas.coords('dustbin', cnv_w/1.11, cnv_h) #450,50
             if len(self.text) > 40:
                 self.mod_text = self.text[:30] + '...'
                 self.canvas.itemconfig('text',text=self.mod_text)
     
     def change(self, count, ticked):
         # global ticked, count
+        # self.canvas.itemconfig('check', image=self.img)
+        if self.ticked:
+            count = 1
         if count == 0:
-            ticked = True
-        self.canvas.itemconfig('check', image=self.img)
-        if count % 2 == 0:
-            ticked = True
+            if not self.ticked:
+                ticked = True
         else:
-            ticked = False
+            if count % 2 == 0:
+                ticked = True
+            else:
+                ticked = False
 
         if ticked == True:
             self.canvas.itemconfig('check', image=self.img1)
             lst[0].play()
         else:
             self.canvas.itemconfig('check', image=self.img)
+        
         count += 1
         self.canvas.tag_unbind('check', '<Button-1>')
         self.canvas.tag_bind('check', '<Button-1>',
@@ -148,20 +159,25 @@ class PrevTasks(tk.Frame):
         self.parent = root
         self.text = text
         self.func = func
+        self.sc_h,self.sc_w = self.parent.winfo_screenheight(),self.parent.winfo_screenwidth()
+        cnv_h,cnv_w = self.sc_h/21.6,self.sc_w/3.84
 
-        self.canvas = tk.Canvas(self, bg='white', height=50, width=500)
+        self.canvas = tk.Canvas(self, bg='white', height=cnv_h, width=cnv_w)
         self.canvas.pack(fill='both', expand=1)
 
-        self.canvas.create_text(250, 25, text=self.text,
+        self.canvas.create_text(cnv_w/2, cnv_h/2, text=self.text,
                                 font=('coolvetica compressed rg',30), tag='text')
 
+        tick_img_res_h,tick_img_res_w = int(self.sc_w/76.8),int(self.sc_h/43.2)
+
+
         self.img = ImageTk.PhotoImage(Image.open(
-            'images/plus_unchecked.png').resize((25, 25), Image.ANTIALIAS))
+            'images/plus_unchecked.png').resize((tick_img_res_w, tick_img_res_h), Image.ANTIALIAS))
         self.img1 = ImageTk.PhotoImage(Image.open(
-            'images/plus_checked.png').resize((25, 25), Image.ANTIALIAS))
+            'images/plus_checked.png').resize((tick_img_res_w, tick_img_res_h), Image.ANTIALIAS))
 
         self.canvas.create_image(
-            450,25, image=self.img, anchor='center', tag='check')
+            cnv_w/1.11,cnv_h/2, image=self.img, anchor='center', tag='check')
 
         self.canvas.tag_bind(
             'check', '<Button-1>', lambda event=None: self.click())
@@ -173,9 +189,9 @@ class PrevTasks(tk.Frame):
         if len(self.text) > 20:
             self.mod_text = self.text[:15] + '\n' + self.text[15:]
             self.canvas.itemconfig('text', text=self.mod_text)
-            self.canvas.config(height=100)
-            self.canvas.coords('text', 250, 50)
-            self.canvas.coords('check', 450, 50)
+            self.canvas.config(height=cnv_w/5)
+            self.canvas.coords('text', cnv_w/2, cnv_h)
+            self.canvas.coords('check', cnv_w/1.11, cnv_h)
             if len(self.text) > 40:
                 self.mod_text = self.text[:30] + '...'
                 self.canvas.itemconfig('text',text=self.mod_text)
@@ -199,3 +215,7 @@ def create_table(con):
         `Tasks` text,
         `Date` text,
         `completed` integer)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS first_time(
+        `date` text,
+        `opened` integer default 1)''')
+    

@@ -1,6 +1,7 @@
 # Main imports
 import tkinter as tk
 from tkinter import ttk
+from tkinter import scrolledtext
 from tkinter import messagebox
 from tkinter import filedialog
 from lstbox import Tasks, PrevTasks, text, create_table
@@ -18,7 +19,6 @@ import pyglet
 root = tk.Tk()
 root.iconbitmap('images/logo.ico')
 root.title('ToDoApp')
-root.geometry('1510x770')
 root['bg'] = 'white'
 root.resizable(0,0)
 pyglet.font.add_file('fonts/coolvetica compressed rg.ttf')
@@ -30,16 +30,21 @@ font_date = ('Roboto Black',15)
 font_header = ('kenyan coffee rg',30)
 con = sqlite3.connect('data/tasks.db')
 toast = win10toast.ToastNotifier()
+sc_h,sc_w = root.winfo_screenheight(),root.winfo_screenwidth()
 tasks = []
 prev_tasks = []
+version = 'Beta 2.00'
 
 # Function for adding tasks
 def default(event=None):
-    # bg_canvas.config(bg='#f0f0f0')
-    scroll_frame.config(bg='#f0f0f0')
-    tasks.append(Tasks(scroll_frame,text=text_entry.acquire(),d_date=date_picker.get()))
-    tasks[-1].pack(pady=10)
-    text_entry.remove(0,'end')
+    if text_entry.length() <= 25 and text_entry.acquire() != 'None':
+        # bg_canvas.config(bg='#f0f0f0')
+        scroll_frame.config(bg='#f0f0f0')
+        tasks.append(Tasks(scroll_frame,text=text_entry.acquire(),d_date=date_picker.get()))
+        tasks[-1].pack(pady=10)
+        text_entry.remove(0,'end')
+    else:
+        messagebox.showerror('Enter proper details',f'Make sure to enter the task title below 25 characters\nTotal characters now: {text_entry.length()}')
 
 # Function to show day and date
 def timer():
@@ -57,7 +62,7 @@ def timer():
 def change_image(event=None):
     try:
         path = filedialog.askopenfilename(title='Choose an image',filetypes=[('JPEG image','*.jpg'),('PNG image','*.png')])
-        img = ImageTk.PhotoImage(Image.open(path).resize((750,750),Image.ANTIALIAS).filter(ImageFilter.GaussianBlur(2)))
+        img = ImageTk.PhotoImage(Image.open(path).resize((bg_img_res_w,bg_img_res_h),Image.ANTIALIAS).filter(ImageFilter.GaussianBlur(2)))
         date_time_canvas.itemconfig('bg',image=img)
         date_time_canvas.image = img
     except AttributeError:
@@ -65,7 +70,7 @@ def change_image(event=None):
 
 # Function to save the tasks
 def save():
-    if messagebox.askyesno('Are you sure?','Are you sure you want to close the app!'):
+    if messagebox.askyesno('Are you sure?','Are you sure you want to exit?'):
             
         destroyed = False
         c = con.cursor()
@@ -95,9 +100,6 @@ def save():
         if not destroyed:
             con.close()
             root.destroy()
-    
-    else:
-        pass
 
 # Function to add the pending tasks 
 def add_prev_tasks(title,d_date):
@@ -178,7 +180,7 @@ def about():
     frame = tk.LabelFrame(about, text='About this program:', padx=5, pady=5)
     # Making frame items
     l_name = tk.Label(frame, text='Created by Nihaal Nz')
-    l_ver = tk.Label(frame, text='Ver: Beta 1.00')
+    l_ver = tk.Label(frame, text=f'Ver: {version}')
     l_lic = tk.Label(frame, text='Licensed under MIT')
     btn_sup = ttk.Button(frame, text='Website', command=openweb)
     btn_cod = ttk.Button(frame, text='Source Code!', command=openweb_2)
@@ -192,6 +194,28 @@ def about():
     btn_cod.grid(row=4, columnspan=2, sticky='ew', pady=5)
     btn_cls.grid(row=5, columnspan=2, sticky='ew')
 
+# Function to run for first time users
+def first_time():
+    now = datetime.strptime(datetime.now().strftime('%Y/%m/%d %H:%M:%S'),'%Y/%m/%d %H:%M:%S') #setting the format
+    c = con.cursor()
+    c.execute('SELECT * FROM first_time;')
+    data = c.fetchall()
+    if data == []:
+        c.execute('INSERT INTO first_time(`date`) VALUES(?)',(now,))
+        con.commit()
+        changelog = tk.Toplevel()
+        changelog.iconbitmap('images/changes.ico')
+        changelog.resizable(0,0)
+        changelog.title('Changelog')
+        changes = scrolledtext.ScrolledText(master=changelog,wrap='word')
+        changes.pack()
+        ttk.Button(changelog,text='Exit',command=changelog.destroy).pack(fill='x')
+        changelog.attributes('-topmost',1)
+        with open('changelog.txt','r') as f:
+            changes.insert('1.0',f.read())
+            changes.config(state='disabled')
+        
+
 # Tasks frame
 main_section = tk.Frame(root,bg='white')
 main_section.grid(row=0,column=1)
@@ -199,7 +223,7 @@ main_section.grid(row=0,column=1)
 pseudo_frame = tk.Frame(main_section)
 pseudo_frame.grid(row=3,column=0,columnspan=2)
 
-bg_canvas = tk.Canvas(pseudo_frame,bg='white',highlightthickness=0,height=500)
+bg_canvas = tk.Canvas(pseudo_frame,bg='white',highlightthickness=0,height=sc_h/2.16)
 bg_canvas.pack(side='left', fill='both', expand=1)
 
 scrollbar = ttk.Scrollbar(pseudo_frame,orient='vertical',command=bg_canvas.yview)
@@ -228,19 +252,23 @@ text_entry.bind('<Return>',default)
 
 # Date and time Frame
 date_time_frame = tk.Frame(root)
-date_time_frame.grid(row=0,column=2,padx=50,sticky='n')
-
-date_time_canvas = tk.Canvas(date_time_frame,width=400,height=700,highlightthickness=0)
+date_time_frame.grid(row=0,column=2,padx=sc_w/48,sticky='n')
+date_cnv_h,date_cnv_w = sc_h/1.54,sc_w/4.8
+date_time_canvas = tk.Canvas(date_time_frame,width=sc_w/4.8,height=sc_h/1.54,highlightthickness=0) #400x700
 date_time_canvas.pack()
 
-bg = ImageTk.PhotoImage(Image.open('images/bg.jpg').rotate(180).resize((750,750),Image.ANTIALIAS).filter(ImageFilter.GaussianBlur(2)))
-cam1 = ImageTk.PhotoImage(Image.open('images/defaultcam.png').resize((25,25),Image.ANTIALIAS))
-cam2 = ImageTk.PhotoImage(Image.open('images/cam.png').resize((30,30),Image.ANTIALIAS))
-date_time_canvas.create_image(200,350,image=bg,anchor='center',tag='bg')
-date_time_canvas.create_text(200,350,tag='time',font=font_time,anchor='center')
-date_time_canvas.create_text(200,400,tag='date',font=font_date,anchor='center')
+bg_img_res_h,bg_img_res_w = int(sc_w/2.56), int(sc_h/1.44) #750,750
+cam1_img_res_h,cam1_img_res_w = int(sc_w/76.8),int(sc_h/43.2) #25,25
+cam2_img_res_h,cam2_img_res_w = int(sc_w/54.85), int(sc_h/30.85) #35,35
 
-date_time_canvas.create_image(360,660,image=cam1,anchor='center',tag='cam')
+bg = ImageTk.PhotoImage(Image.open('images/bg.jpg').rotate(180).resize((bg_img_res_w,bg_img_res_h),Image.ANTIALIAS).filter(ImageFilter.GaussianBlur(2)))
+cam1 = ImageTk.PhotoImage(Image.open('images/defaultcam.png').resize((cam1_img_res_w,cam1_img_res_h),Image.ANTIALIAS))
+cam2 = ImageTk.PhotoImage(Image.open('images/cam.png').resize((cam2_img_res_w,cam2_img_res_h),Image.ANTIALIAS))
+date_time_canvas.create_image(date_cnv_w/2,date_cnv_h/2,image=bg,anchor='center',tag='bg') #200,350
+date_time_canvas.create_text(date_cnv_w/2,date_cnv_h/2,tag='time',font=font_time,anchor='center') #200,350
+date_time_canvas.create_text(date_cnv_w/2,date_cnv_h/1.75,tag='date',font=font_date,anchor='center') #200,400
+
+date_time_canvas.create_image(date_cnv_w/1.11,date_cnv_h/1.06,image=cam1,anchor='center',tag='cam') #360,660
 date_time_canvas.tag_raise('cam')
 date_time_canvas.tag_bind('cam','<Enter>',lambda e:date_time_canvas.itemconfig('cam',image=cam2))
 date_time_canvas.tag_bind('cam','<Leave>',lambda e:date_time_canvas.itemconfig('cam',image=cam1))
@@ -248,19 +276,19 @@ date_time_canvas.tag_bind('cam','<Button-1>',change_image)
 
 # Previous tasks frame
 previous_tasks = tk.Frame(root,bg='white')
-previous_tasks.grid(row=0,column=0,sticky='n',padx=(0,50))
+previous_tasks.grid(row=0,column=0,sticky='n',padx=(0,sc_w/48))
 
 pseudo_frame_prev = tk.Frame(previous_tasks)
 pseudo_frame_prev.grid(row=1,column=0)
 
-bg_canvas_prev = tk.Canvas(pseudo_frame_prev,bg='white',highlightthickness=0,height=500)
+bg_canvas_prev = tk.Canvas(pseudo_frame_prev,bg='white',highlightthickness=0,height=sc_h/2.16)
 bg_canvas_prev.pack(side='left', fill='both', expand=1)
 
 scrollbar_prev = ttk.Scrollbar(pseudo_frame_prev,orient='vertical',command=bg_canvas_prev.yview)
 bg_canvas_prev.config(yscrollcommand=scrollbar_prev.set)
 
 scroll_frame_prev = tk.Frame(bg_canvas_prev,bg='white')
-scroll_frame_prev.bind('<Configure>', lambda e: [bg_canvas_prev.configure(scrollregion = bg_canvas_prev.bbox("all")),scrollbar_prev.pack(side='right', fill='y')])
+scroll_frame_prev.bind('<Configure>', lambda e: [bg_canvas_prev.configure(scrollregion=bg_canvas_prev.bbox("all")),scrollbar_prev.pack(side='right', fill='y')])
 bg_canvas_prev.create_window(0,0,window=scroll_frame_prev,anchor='n')
 
 previous_sec_header = tk.Label(previous_tasks,text='Pending tasks',font=font_header,bg='white')
@@ -308,9 +336,15 @@ ToolTip(text_entry,text=text,bg='white')
 timer()
 try:
     populate()
+    
 except sqlite3.OperationalError:
     create_table(con)
     populate()
+try:
+    first_time()
+except sqlite3.OperationalError:
+    create_table(con)
+    first_time()
 
 # GUI loop.
 root.mainloop()
